@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Countdown Timer</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+        }
+        .container {
+            margin-top: 50px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Countdown Timer</h2>
+    <button id="durationBtn">Set Timer Duration</button>
+    <button id="dateTimeBtn">Set Specific Date and Time</button>
+    <button id="startBtn" style="display: none;">Start Timer</button>
+    <p id="timerDisplay"></p>
+</div>
+
+<script>
+    let targetDate;
+
+    function countdownTimer(onUpdate, onFinished) {
+        // Calculate the time remaining
+        const now = new Date().getTime();
+        const timeRemaining = targetDate - now;
+
+        // Check if the target date has passed
+        if (timeRemaining <= 0) {
+            onFinished();
+            return;
+        }
+
+        // Calculate remaining time components
+        const days = Math.floor(timeRemaining / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((timeRemaining % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((timeRemaining % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((timeRemaining % (1000 * 60)) / 1000);
+
+        // Call onUpdate callback with remaining time
+        onUpdate(days, hours, minutes, seconds);
+    }
+
+    // Function to prompt the user for timer duration
+    function promptForTime() {
+        const timeInput = prompt("Enter the duration of the countdown timer in minutes:");
+        if (timeInput === null) {
+            return; // Cancelled by user
+        }
+        const durationInMinutes = parseInt(timeInput, 10);
+        if (isNaN(durationInMinutes) || durationInMinutes <= 0) {
+            alert("Invalid input. Please enter a positive number for the duration.");
+            promptForTime();
+        } else {
+            targetDate = new Date(new Date().getTime() + durationInMinutes * 60000); // Convert minutes to milliseconds
+            document.getElementById('startBtn').style.display = 'block';
+            document.getElementById('timerDisplay').textContent = '';
+        }
+    }
+
+    // Function to prompt the user for specific date and time
+    function promptForDateTime() {
+        const dateTimeInput = prompt("Enter the date and time (YYYY-MM-DD HH:MM:SS) for the countdown timer:");
+        if (dateTimeInput === null) {
+            return; // Cancelled by user
+        }
+        const tempTargetDate = new Date(dateTimeInput);
+        if (isNaN(tempTargetDate.getTime())) {
+            alert("Invalid input. Please enter the date and time in the correct format (YYYY-MM-DD HH:MM:SS).");
+            promptForDateTime();
+        } else if (tempTargetDate.getTime() <= new Date().getTime()) {
+            alert("Invalid input. Please enter a future date and time.");
+            promptForDateTime();
+        } else {
+            targetDate = tempTargetDate;
+            document.getElementById('startBtn').style.display = 'block';
+            document.getElementById('timerDisplay').textContent = '';
+        }
+    }
+
+    // Function to start the countdown timer
+    function startCountdown() {
+        countdownTimer(
+            (days, hours, minutes, seconds) => {
+                const timerDisplay = document.getElementById('timerDisplay');
+                timerDisplay.textContent = `${days} days ${hours} hours ${minutes} minutes ${seconds} seconds remaining`;
+            },
+            () => {
+                const timerDisplay = document.getElementById('timerDisplay');
+                timerDisplay.textContent = "Countdown finished!";
+            }
+        );
+    }
+
+    // Event listener for duration button
+    document.getElementById('durationBtn').addEventListener('click', promptForTime);
+
+    // Event listener for date and time button
+    document.getElementById('dateTimeBtn').addEventListener('click', promptForDateTime);
+
+    // Event listener for start button
+    document.getElementById('startBtn').addEventListener('click', startCountdown);
+</script>
+
+</body>
+</html>
+
